@@ -1,0 +1,14 @@
+{
+  "name": "kairos-hub",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test *.test.mjs",
+    "dev": "python3 -m http.server 4173 --directory dist",
+    "format": "prettier --write dist/*.js dist/*.mjs dist/styles.css dist/index.html"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}
