@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {serveIntroMedia} from './server/intro-media.mjs';
+const asset={data:btoa('0123456789'),type:'video/mp4'};
+test('video range responses support mobile playback and seeking',async()=>{const r=serveIntroMedia(new Request('https://example.test/assets/intro/intro.mp4',{headers:{Range:'bytes=2-5'}}),asset);assert.equal(r.status,206);assert.equal(r.headers.get('Content-Range'),'bytes 2-5/10');assert.equal(await r.text(),'2345');});
+test('suffix ranges, HEAD and invalid ranges are handled',async()=>{const suffix=serveIntroMedia(new Request('https://example.test',{headers:{Range:'bytes=-3'}}),asset);assert.equal(await suffix.text(),'789');const head=serveIntroMedia(new Request('https://example.test',{method:'HEAD'}),asset);assert.equal(head.headers.get('Content-Length'),'10');assert.equal(await head.text(),'');const bad=serveIntroMedia(new Request('https://example.test',{headers:{Range:'bytes=30-40'}}),asset);assert.equal(bad.status,416);});

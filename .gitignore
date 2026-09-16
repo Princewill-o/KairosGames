@@ -28,3 +28,7 @@ bin/
 .DS_Store
 node_modules/
 .sites-runtime/
+
+/dist/
+/.wrangler/
+/server/static.generated.mjs

@@ -1,0 +1,1 @@
+{"name":"kairos-local","main":"dist/server/index.js","compatibility_date":"2026-06-01","d1_databases":[{"binding":"DB","database_name":"kairos-rooms","database_id":"local-kairos-rooms","migrations_dir":"drizzle"}],"observability":{"enabled":true}}

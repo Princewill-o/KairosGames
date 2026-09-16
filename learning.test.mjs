@@ -8,7 +8,7 @@ import {
   freshProgress,
   gardenGrowth,
   psalmBlanks,
-} from "./dist/learning-engine.mjs";
+} from "./public/learning-engine.mjs";
 test("phrase and word tiles retain the exact passage", () => {
   const t = "The LORD is my shepherd; I shall not want.";
   assert.equal(tokenize(t, "growth").join(" "), t);

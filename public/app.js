@@ -1,3 +1,5 @@
+import { multiplayer } from "./multiplayer.mjs";
+import { freshRound } from "./random.mjs";
 import { games, verses } from "./content.mjs";
 import { freshProgress, recordCompletion } from "./learning-engine.mjs";
 import { launchGame } from "./games.mjs";
@@ -66,7 +68,7 @@ function stop() {
   run = null;
 }
 function header(view = "home") {
-  return `<header class="topbar"><a class="brand" href="#">${icon("Books")}<span>kairos<span class="brand-sub">SCRIPTURE & PLAY</span></span></a><nav aria-label="Main navigation"><a class="nav ${view === "home" ? "active" : ""}" href="#">The game library</a><a class="nav ${view === "collection" ? "active" : ""}" href="#journey">My journey</a></nav><div class="top-tools"><span class="streak">${icon("Star")} ${progress.streak} day streak</span><select id="mode" aria-label="Difficulty mode" ${view === "play" ? "disabled" : ""}><option value="seeker" ${mode === "seeker" ? "selected" : ""}>Seeker / Kids</option><option value="growth" ${mode === "growth" ? "selected" : ""}>Growth</option></select><button class="sound-toggle" aria-label="${sound ? "Mute" : "Enable"} sound" aria-pressed="${sound}">${icon("Sound")}</button></div></header>`;
+  return `<header class="topbar"><a class="brand" href="#">${icon("Books")}<span>kairos<span class="brand-sub">SCRIPTURE & PLAY</span></span></a><nav aria-label="Main navigation"><a class="nav ${view === "home" ? "active" : ""}" href="#">The game library</a><a class="nav ${view === "multiplayer" ? "active" : ""}" href="#multiplayer">Play together</a><a class="nav ${view === "collection" ? "active" : ""}" href="#journey">My journey</a></nav><div class="top-tools"><span class="streak">${icon("Star")} ${progress.streak} day streak</span><select id="mode" aria-label="Difficulty mode" ${view === "play" ? "disabled" : ""}><option value="seeker" ${mode === "seeker" ? "selected" : ""}>Seeker / Kids</option><option value="growth" ${mode === "growth" ? "selected" : ""}>Growth</option></select><button class="sound-toggle" aria-label="${sound ? "Mute" : "Enable"} sound" aria-pressed="${sound}">${icon("Sound")}</button></div></header>`;
 }
 function bindHeader() {
   document.querySelector("#mode").onchange = (e) => {
@@ -108,20 +110,19 @@ function world() {
 function home() {
   stop();
   document.querySelector("#app").innerHTML =
-    `${header()}<main><section class="hero"><div class="hero-copy"><span class="eyebrow">A LITTLE PLAY. A DEEPER ROOT.</span><h1>Little adventures.<br>Lasting <em>wisdom.</em></h1><p>Ten small ways to explore Scripture, grow in faith,<br class="desktop"> and take something good into your day.</p><button class="primary" id="begin">Let’s play <span>→</span></button><div class="hero-note">10 mini-games <span>·</span> Your pace <span>·</span> Room to grow</div></div>${world()}</section><section class="library"><div class="section-heading"><div><span class="eyebrow">PICK A PATH</span><h2>What will you discover today?</h2></div><span class="count">${Object.keys(progress.games).length} / 10 explored</span></div><div class="game-grid">${games
+    `${header()}<main><section class="play-welcome"><div><span class="eyebrow">CHOOSE YOUR NEXT ADVENTURE</span><h1>A little play. <em>A bigger story.</em></h1><p>Explore a new meadow, discover a fresh question, or gather your friends.</p></div><button class="secondary" id="surprise">Surprise me ↗</button></section><section class="featured-games" aria-label="New games"><a class="feature-card feature-meadow" href="#play/shepherd"><div class="feature-scene">${world()}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Shepherd’s Meadow</h2><p>WASD / arrows to explore. Bring every sheep home.</p><span class="feature-cta">Enter the meadow →</span></div></a><a class="feature-card feature-scrolls" href="#play/scrolls"><div class="feature-art">${icon("Papyrus")}${icon("Books")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Scroll Quest</h2><p>A new map. Six scrolls. Fresh Bible discoveries.</p><span class="feature-cta">Start your quest →</span></div></a><a class="feature-card feature-party" href="#multiplayer"><div class="feature-art">${icon("Players")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2–8 PLAYERS ONLINE</span><h2>Guess the Chapter</h2><p>Describe the story. Keep the chapter secret.</p><span class="feature-cta">Create or join a room →</span></div></a></section><section class="library"><div class="section-heading"><div><span class="eyebrow">PICK A PATH</span><h2>What will you discover today?</h2></div><span class="count">${Object.keys(progress.games).length} / ${games.length} solo games explored</span></div><div class="game-grid">${games.filter(g=>!["shepherd","scrolls"].includes(g.id))
       .map((g, i) => {
         const played = progress.games[g.id];
         return `<a class="game-card ${g.color}" href="#play/${g.id}"><div class="card-art">${icon(g.icon)}<span class="card-number">${String(i + 1).padStart(2, "0")}</span>${played ? `<span class="progress-ring" style="--progress:${played.best}%" aria-label="Best score ${played.best} percent"><b>${played.best}</b></span>` : ""}</div><div class="card-copy"><span class="tag">${g.tag}</span><h3>${g.title}</h3><p>${g.goal}</p><div class="card-bottom"><span>${played ? "Play again" : "Start exploring"}</span><span class="round-arrow">↗</span></div></div></a>`;
       })
       .join("")}</div></section>${footer()}</main>`;
   bindHeader();
-  document.querySelector("#begin").onclick = () =>
-    document.querySelector(".library").scrollIntoView({ behavior: "smooth" });
+  document.querySelector("#surprise").onclick = () => {location.hash="play/"+freshRound("surprise-game",games,1)[0].id;};
 }
 function collection() {
   stop();
   document.querySelector("#app").innerHTML =
-    `${header("collection")}<main class="collection"><span class="eyebrow">ONE SMALL STEP AT A TIME</span><h1>Your journey is growing.</h1><div class="stat-grid"><article>${icon("Star")}<b>${progress.streak}</b><span>day streak</span></article><article>${icon("Flag")}<b>${Object.keys(progress.games).length}/10</b><span>games explored</span></article><article>${icon("Books")}<b>${progress.mastered.length}</b><span>verses mastered</span></article><article>${icon("Plant")}<b>${Math.round((Object.values(progress.garden).reduce((a, b) => a + b, 0) / 27) * 100)}%</b><span>garden grown</span></article></div><section class="journal-section"><h2>Verses I know</h2><p class="muted">Earn a verse here with a perfect Growth reconstruction or a perfect final Psalm pass.</p>${
+    `${header("collection")}<main class="collection"><span class="eyebrow">ONE SMALL STEP AT A TIME</span><h1>Your journey is growing.</h1><div class="stat-grid"><article>${icon("Star")}<b>${progress.streak}</b><span>day streak</span></article><article>${icon("Flag")}<b>${Object.keys(progress.games).length}/${games.length}</b><span>games explored</span></article><article>${icon("Books")}<b>${progress.mastered.length}</b><span>verses mastered</span></article><article>${icon("Plant")}<b>${Math.round((Object.values(progress.garden).reduce((a, b) => a + b, 0) / 27) * 100)}%</b><span>garden grown</span></article></div><section class="journal-section"><h2>Verses I know</h2><p class="muted">Earn a verse here with a perfect Growth reconstruction or a perfect final Psalm pass.</p>${
       progress.mastered.length
         ? progress.mastered
             .map((id) => verses.find((v) => v.id === id))
@@ -190,13 +191,13 @@ function play(id) {
   const pause = () => {
     if (!run || run.done) return;
     run.paused = !run.paused;
-    activeModule?.pause?.(run.paused);
     document.querySelector(".pause-cover").hidden = !run.paused;
     document.querySelector("#stage").inert = run.paused;
     document.querySelector("#pause").textContent = run.paused
       ? "Resume"
       : "Pause";
     document.querySelector("#stage").classList.toggle("paused", run.paused);
+    activeModule?.pause?.(run.paused);
     if (run.paused) document.querySelector("#resume").focus();
   };
   document.querySelector("#pause").onclick = pause;
@@ -254,9 +255,17 @@ function complete(
   document.querySelector(".result h2").setAttribute("tabindex", "-1");
   document.querySelector(".result h2").focus();
 }
+function party(code="") {
+  stop();
+  document.querySelector("#app").innerHTML=`${header("multiplayer")}<main class="party-main"><div id="party-root"></div>${footer()}</main>`;
+  bindHeader();
+  activeModule=multiplayer(document.querySelector("#party-root"),code);
+}
 function route() {
   const hash = location.hash.slice(1);
-  if (hash.startsWith("play/")) play(hash.slice(5));
+  if (hash==="multiplayer") party();
+  else if(/^room\/[A-Z2-9]{6}$/.test(hash)) party(hash.slice(5));
+  else if (hash.startsWith("play/")) play(hash.slice(5));
   else if (hash === "journey") collection();
   else home();
   window.scrollTo(0, 0);

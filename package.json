@@ -1,14 +1,22 @@
 {
   "name": "kairos-hub",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test *.test.mjs",
-    "dev": "python3 -m http.server 4173 --directory dist",
-    "format": "prettier --write dist/*.js dist/*.mjs dist/styles.css dist/index.html"
+    "dev": "node scripts/dev.mjs",
+    "format": "prettier --write public/*.js public/*.mjs public/styles.css server/*.mjs",
+    "build": "node scripts/build.mjs",
+    "db:generate": "drizzle-kit generate"
   },
   "devDependencies": {
-    "prettier": "3.6.2"
+    "prettier": "3.6.2",
+    "esbuild": "0.19.12",
+    "drizzle-kit": "0.30.6",
+    "wrangler": "4.104.0"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.38.4"
   }
 }

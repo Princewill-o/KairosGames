@@ -1,13 +1,16 @@
+import { freshRound, shuffleWith } from "./random.mjs";
+import { armorAlternates, fruitAlternates } from "./extra-content.mjs";
+import { adventureGame } from "./adventure.mjs";
 import {
   verses,
-  prayers,
-  arcs,
-  parables,
+  prayers as prayerBank,
+  arcs as arcBank,
+  parables as parableBank,
   timeline,
-  armor,
+  armor as armorBank,
   wisdom,
   cities,
-  journey,
+  journey as journeyBank,
   fruits,
 } from "./content.mjs";
 import {
@@ -29,15 +32,17 @@ const instruction = (title, text) =>
 const button = (text, id, primary = true) =>
   `<button class="${primary ? "primary" : "secondary"}" id="${id}">${text}</button>`;
 const choices = (items, attr = "answer") =>
-  `<div class="choices">${items.map((text, i) => `<button class="choice" data-${attr}="${i}"><span class="choice-letter">${String.fromCharCode(65 + i)}</span><span>${text}</span></button>`).join("")}</div>`;
-function picker(c, items, render) {
+  `<div class="choices">${shuffleWith(items.map((text, id) => ({text,id}))).map(({text,id}, i) => `<button class="choice" data-${attr}="${id}"><span class="choice-letter">${String.fromCharCode(65 + i)}</span><span>${text}</span></button>`).join("")}</div>`;
+function picker(c, pool, render) {
+  const items = freshRound("passages-" + pool.length, pool, 3);
   c.stage.innerHTML =
     instruction(
       "Choose a passage",
-      "Every small repetition helps a verse take root.",
+      "A fresh selection each visit. Choose one, or draw another selection.",
     ) +
-    `<div class="passage-picker">${items.map((v, i) => `<button class="choice" data-passage="${i}">${c.icon("Papyrus")}<span><strong>${v.reference}</strong><small>${v.translation} · ${v.text.split(" ").length} words</small></span><span>→</span></button>`).join("")}</div>`;
+    `<div class="passage-picker">${items.map((v, i) => `<button class="choice" data-passage="${i}">${c.icon("Papyrus")}<span><strong>${v.reference}</strong><small>${v.translation} · ${v.text.split(" ").length} words</small></span><span>→</span></button>`).join("")}</div><div class="game-actions">${button("Another selection", "redraw-passages", false)}</div>`;
   listen(c, "[data-passage]", (d) => render(items[+d.passage]));
+  $(c, "#redraw-passages").onclick = () => picker(c, pool, render);
 }
 function verseGame(c) {
   let mistakes = 0;
@@ -158,6 +163,7 @@ function verseGame(c) {
   return {};
 }
 function prayerGame(c) {
+  const prayers = freshRound("prayer-scenarios", prayerBank, 3);
   let index = 0,
     selected = null,
     placed = {},
@@ -271,6 +277,7 @@ function prayerGame(c) {
   };
 }
 function sandalsGame(c) {
+ const arcs=shuffle(arcBank);
   let arc,
     index = 0,
     canonCount = 0;
@@ -344,6 +351,7 @@ function sandalsGame(c) {
   return {};
 }
 function parableGame(c) {
+ const parables=freshRound("parable-options",parableBank,3);
   let p = null,
     clues = new Set(),
     mistakes = 0;
@@ -466,6 +474,7 @@ function timelineGame(c) {
   return {};
 }
 function armorGame(c) {
+  const armor = armorBank.map(a => ({...a,scenario:freshRound("armor-"+a.id,[a.scenario,...armorAlternates[a.id]],1)[0]}));
   let round = 0,
     mistakes = 0,
     equipped = [];
@@ -530,7 +539,7 @@ function wisdomGame(c) {
     best = 0,
     remaining = 12,
     answered = false;
-  const deck = shuffle(wisdom);
+  const deck = freshRound("wisdom", wisdom, 6);
   function render() {
     answered = false;
     remaining = 12;
@@ -602,6 +611,7 @@ function wisdomGame(c) {
   };
 }
 function journeyGame(c) {
+  const journey = journeyBank.map(leg=>({...leg, options:shuffle(leg.options)}));
   let index = 0,
     hints = 0,
     arrived = false,
@@ -686,7 +696,7 @@ function gardenGame(c) {
     selected = null,
     answered = false,
     garden = { ...c.progress.garden };
-  const deck = shuffle(fruits);
+  const deck = shuffle(fruits.map(f=>{const copy=[...f];copy[2]=freshRound("fruit-"+f[0],[f[2],...fruitAlternates[f[0]]],1)[0];return copy;}));
   function render() {
     const f = deck[index];
     answered = false;
@@ -765,12 +775,16 @@ function psalmsGame(c) {
     answered = false,
     travelStart = 0,
     travelEnd = 0;
-  picker(c, verses, (chosen) => {
+  let recallOrder=[];
+  picker(c, verses.filter(v=>v.reference.startsWith("Psalm")), (chosen) => {
     v = chosen;
+    const words=v.text.split(" ");
+    const keys=words.map((w,i)=>v.keywords.includes(w.toLowerCase().replace(/[^a-z]/g,""))?i:-1).filter(i=>i>=0);
+    recallOrder=[...shuffle(keys),...shuffle(words.map((_,i)=>i).filter(i=>!keys.includes(i)))];
     beginPass();
   });
   function beginPass() {
-    blanks = psalmBlanks(v, pass);
+    blanks = recallOrder.slice(0, pass===1?1:pass===2?2:4).sort((a,b)=>a-b);
     blankIndex = 0;
     passCorrect = 0;
     render();
@@ -888,6 +902,8 @@ function psalmsGame(c) {
 }
 export function launchGame(id, c) {
   return {
+    shepherd: (c)=>adventureGame(c,"shepherd"),
+    scrolls: (c)=>adventureGame(c,"scrolls"),
     verse: verseGame,
     prayer: prayerGame,
     sandals: sandalsGame,

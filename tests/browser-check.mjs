@@ -10,8 +10,9 @@ import {
   wisdom,
   journey,
   fruits,
-} from "../dist/content.mjs";
-import { tokenize, psalmBlanks } from "../dist/learning-engine.mjs";
+} from "../public/content.mjs";
+import {armorAlternates,fruitAlternates} from "../public/extra-content.mjs";
+import { tokenize, psalmBlanks } from "../public/learning-engine.mjs";
 const browser = await chromium.launch({ headless: true, channel: "chrome" });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
 const errors = [];
@@ -26,8 +27,10 @@ const result = async (id) => {
 };
 try {
   await go("verse");
+  let chosenReference=await page.locator('[data-passage="0"] strong').innerText();
+  let chosenVerse=verses.find(v=>v.reference===chosenReference);
   await page.locator('[data-passage="0"]').click();
-  for (const text of tokenize(verses[0].text, "seeker"))
+  for (const text of tokenize(chosenVerse.text, "seeker"))
     await page.getByRole("button", { name: text, exact: true }).click();
   await page.locator("#check").click();
   await page.locator("#finish").click();
@@ -51,7 +54,7 @@ try {
   }
   await result("prayer");
   await go("sandals");
-  await page.locator('[data-arc="0"]').click();
+  await page.locator("[data-arc]").filter({has:page.getByText("Peter",{exact:true})}).click();
   await page.locator('[data-answer="1"]').click();
   await page.locator("#branch").click();
   await page.locator("#flavor-button").click();
@@ -62,13 +65,14 @@ try {
   await result("sandals");
   assert.match(await page.locator(".result-score").innerText(), /50/);
   await go("parable");
+  const parableTitle=await page.locator('[data-answer="0"] span:last-child').innerText();
+  const parable=parables.find(p=>p.title===parableTitle);
   await page.locator('[data-answer="0"]').click();
-  assert.equal(await page.locator("[data-answer]").count(), 0);
-  for (let i = 0; i < 4; i++) await page.locator(`[data-clue="${i}"]`).click();
-  await page.locator('[data-answer="0"]').click();
-  await page.locator('[data-answer="1"]').click();
-  await page.locator("#finish").click();
-  await result("parable");
+  assert.equal(await page.locator('[data-answer]').count(),0);
+  for(let i=0;i<parable.panels.length;i++)await page.locator(`[data-clue="${i}"]`).click();
+  await page.locator(`[data-answer="${(parable.correct+1)%3}"]`).click();
+  await page.locator(`[data-answer="${parable.correct}"]`).click();
+  await page.locator('#finish').click();await result('parable');
   await go("timeline");
   await page.locator('[data-event="0"]').click();
   await page.locator('[data-slot="1"]').click();
@@ -81,7 +85,7 @@ try {
   await go("armor");
   for (let i = 0; i < 6; i++) {
     const text = await page.locator(".scenario-card h3").innerText();
-    const correct = armor.findIndex((a) => a.scenario === text);
+    const correct = armor.findIndex((a) => a.scenario === text || armorAlternates[a.id].includes(text));
     await page.locator(`[data-piece="${correct}"]`).click();
     await page.locator("#next").click();
   }
@@ -103,35 +107,33 @@ try {
   await go("garden");
   for (let i = 0; i < 9; i++) {
     const text = await page.locator(".garden-scenario h3").innerText();
-    const f = fruits.find((f) => f[2] === text);
+    const f = fruits.find((f) => f[2] === text || fruitAlternates[f[0]].includes(text));
     await page.locator(`[data-fruit="${f[0]}"]`).click();
     await page.locator("#water").click();
     await page.locator("#next").click();
   }
   await result("garden");
   await go("psalms");
+  chosenReference=await page.locator('[data-passage="0"] strong').innerText();chosenVerse=verses.find(v=>v.reference===chosenReference);
   await page.locator('[data-passage="0"]').click();
-  for (let pass = 1; pass <= 3; pass++) {
-    for (const b of psalmBlanks(verses[0], pass)) {
-      const word = verses[0].text.split(" ")[b];
-      await page
-        .locator("[data-answer]")
-        .filter({ hasText: word })
-        .last()
-        .click();
-      await page.locator("#next").click();
+  for(let pass=1;pass<=3;pass++){
+    while(await page.locator('.blank-word').count()){
+      const position=await page.locator('#psalm-line').evaluate(el=>[...el.children].findIndex(x=>x.classList.contains('blank-word')));
+      const word=chosenVerse.text.split(' ')[position];
+      await page.locator('[data-answer]').filter({has:page.getByText(word,{exact:true})}).click();
+      await page.locator('#next').click();
     }
-    await page.locator("#next").click();
+    await page.locator('#next').click();
   }
-  await result("psalms");
+  await result('psalms');
   await page.goto("http://localhost:4173/#journey");
-  assert.match(await page.locator(".stat-grid").innerText(), /10\/10/);
+  assert.match(await page.locator(".stat-grid").innerText(), /10\/12/);
   assert.match(
     await page.locator(".journal-entry").innerText(),
     /<script>safe text<\/script>/,
   );
   await page.reload();
-  assert.match(await page.locator(".stat-grid").innerText(), /10\/10/);
+  assert.match(await page.locator(".stat-grid").innerText(), /10\/12/);
   await page.selectOption("#mode", "growth");
   await go("wisdom");
   await page.locator("#pause").click();
@@ -144,8 +146,10 @@ try {
     Number(await page.locator("#round-time").textContent()) < Number(before),
   );
   await go("psalms");
+  chosenReference=await page.locator('[data-passage="0"] strong').innerText();chosenVerse=verses.find(v=>v.reference===chosenReference);
   await page.locator('[data-passage="0"]').click();
-  await page.locator("#recall").fill("shepherd");
+  const pos=await page.locator('#psalm-line').evaluate(el=>[...el.children].findIndex(x=>x.classList.contains('blank-word')));
+  await page.locator('#recall').fill(chosenVerse.text.split(' ')[pos]);
   await page.locator("#recall-form button").click();
   assert.match(await page.locator("#feedback").innerText(), /belongs/);
   await page.setViewportSize({ width: 390, height: 844 });

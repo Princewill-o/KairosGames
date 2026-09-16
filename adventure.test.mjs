@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {makeWorld,movePlayer,reachableTiles} from './public/adventure-engine.mjs';
+import {drawFromBag} from './public/random.mjs';
+test('question bag does not repeat before exhaustion',()=>{let state={};const pool=['a','b','c','d'];let picks=[];for(let i=0;i<4;i++){const r=drawFromBag(pool,1,state,()=>.4);state=r.state;picks.push(...r.items);}assert.equal(new Set(picks).size,4);const next=drawFromBag(pool,1,state,()=>.4);assert.notEqual(next.items[0],picks.at(-1));});
+test('random map targets and exit are reachable for 100 generated worlds',()=>{for(let seed=0;seed<100;seed++){const w=makeWorld(seed,'shepherd');const reachable=reachableTiles(w,w.start);for(const t of [...w.targets,w.exit])assert.ok(reachable.has(`${t.x},${t.y}`));assert.equal(new Set(w.targets.map(t=>`${t.x},${t.y}`)).size,w.targets.length);}});
+test('movement respects solid walls and normalizes diagonal speed',()=>{const w=makeWorld(12,'scrolls');const start={x:1.5,y:1.5};const x=movePlayer(w,start,-1,0,1);assert.ok(x.x>=1.2);const a=movePlayer(w,start,1,0,.03),b=movePlayer(w,start,1,1,.03);assert.ok(Math.hypot(b.x-start.x,b.y-start.y)<=Math.hypot(a.x-start.x,a.y-start.y)+.001);});
