@@ -10,6 +10,8 @@ The Cute Fantasy Free license permits non-commercial projects and modification, 
 
 Environments are composed in HTML/CSS using the supplied sprites; the journey map is a purpose-built approximate SVG diagram. No remote imagery or newly generated artwork is required.
 
+The 2D adventures reuse the supplied player, sheep, tree, grass, water, house, and scroll/icon art. `player-walk.png` is a local crop of the supplied player sprite sheet used for a small walking animation. The generated map geometry contains no additional imagery.
+
 ## Kairos Games opening screen
 
 `public/assets/intro/poster.webp` is a web-optimized copy of the user-supplied `Gemini_Generated_Image_6gl2736gl2736gl2.jpeg`. `public/assets/intro/intro.mp4` is a streaming-optimized H.264/AAC copy of the supplied `make_the_bird_and_the_backgrou.mp4` (approximately 10 seconds). The original files in Downloads are unchanged.
