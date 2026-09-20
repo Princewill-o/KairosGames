@@ -1,5 +1,7 @@
 # Kairos — Scripture & Play
 
+# KairosGames
+
 A server-backed Scripture & Play game library with randomized solo rounds, two 2D adventures, and online multiplayer.
 
 ## Run
