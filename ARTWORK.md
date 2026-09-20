@@ -17,3 +17,11 @@ The 2D adventures reuse the supplied player, sheep, tree, grass, water, house, a
 `public/assets/intro/poster.webp` is a web-optimized copy of the user-supplied `Gemini_Generated_Image_6gl2736gl2736gl2.jpeg`. `public/assets/intro/intro.mp4` is a streaming-optimized H.264/AAC copy of the supplied `make_the_bird_and_the_backgrou.mp4` (approximately 10 seconds). The original files in Downloads are unchanged.
 
 The fullscreen overlay is isolated in `public/intro.css` and `public/intro.mjs`, mounted by `public/index.html`. Pressing the image starts the video with its audio; completion fades into the mounted site. Portrait screens preserve the complete artwork over a blurred fullscreen backdrop. Skip, keyboard activation, reduced-motion fades, and playback-error recovery are supported. `server/intro-media.mjs` handles media byte ranges for streaming and seeking.
+
+## September 2026 arcade checkpoint
+
+The user explicitly requested original sprites and then prohibited emoji icons. `public/assets/arcade/characters.png`, `walk.png`, `creatures.png`, and `world.webp` were generated with the built-in image-generation tool for this request. The walk atlas has genuine alpha, four frames per row, and four character rows; the runtime cycles frames while moving, with reduced-motion support. The creature atlas is a 4x4 illustrated asset sheet, composited with multiply in the browser because its supplied output is opaque white. It is not an emoji font. `artwork/world-source.png` retains the full original scenic image.
+
+`public/assets/handmade/asset-N.png` are unchanged copies of the supplied `Game_ui_pack_handmade_bakudas/PNG - shaded/Asset Nshaded_@2x.png`. Renamed for reliable URL handling. No license was supplied in that folder; no extra rights are asserted. Existing asset licenses are retained.
+
+Prompts: four original child explorers in a cel-shaded PS2-inspired storybook style; four consecutive walking poses for each explorer in a 4x4 atlas; a 4x4 sheet of lion, sheep, rabbit, fox, bear, owl, elephant, turtle, three fish, boot, frog, ice crystal, wolf and shrub; a colourful ark/meadow/lake/desert landscape. Full generation prompts are recorded in the task conversation. No generated image replaces the supplied opening movie.

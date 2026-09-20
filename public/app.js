@@ -1,3 +1,4 @@
+import { arcade } from './library/app.mjs';
 import { multiplayer } from "./multiplayer.mjs";
 import { freshRound } from "./random.mjs";
 import { games, verses } from "./content.mjs";
@@ -17,6 +18,7 @@ const STORE = "kairos-learning-v2";
 let progress = freshProgress(),
   mode = "seeker",
   sound = false,
+  theme = "light",
   run = null,
   activeModule = null,
   clock = null,
@@ -32,12 +34,13 @@ try {
   }
   mode = saved?.mode === "growth" ? "growth" : "seeker";
   sound = !!saved?.sound;
+  theme = saved?.theme === "dark" ? "dark" : "light";
 } catch {
   storageAvailable = false;
 }
 function save() {
   try {
-    localStorage.setItem(STORE, JSON.stringify({ progress, mode, sound }));
+    localStorage.setItem(STORE, JSON.stringify({ progress, mode, sound, theme }));
   } catch {
     storageAvailable = false;
   }
@@ -68,7 +71,7 @@ function stop() {
   run = null;
 }
 function header(view = "home") {
-  return `<header class="topbar"><a class="brand" href="#">${icon("Books")}<span>kairos<span class="brand-sub">SCRIPTURE & PLAY</span></span></a><nav aria-label="Main navigation"><a class="nav ${view === "home" ? "active" : ""}" href="#">The game library</a><a class="nav ${view === "multiplayer" ? "active" : ""}" href="#multiplayer">Play together</a><a class="nav ${view === "collection" ? "active" : ""}" href="#journey">My journey</a></nav><div class="top-tools"><span class="streak">${icon("Star")} ${progress.streak} day streak</span><select id="mode" aria-label="Difficulty mode" ${view === "play" ? "disabled" : ""}><option value="seeker" ${mode === "seeker" ? "selected" : ""}>Seeker / Kids</option><option value="growth" ${mode === "growth" ? "selected" : ""}>Growth</option></select><button class="sound-toggle" aria-label="${sound ? "Mute" : "Enable"} sound" aria-pressed="${sound}">${icon("Sound")}</button></div></header>`;
+  return `<header class="topbar"><a class="brand" href="#">${icon("Books")}<span>kairos<span class="brand-sub">SCRIPTURE & PLAY</span></span></a><nav aria-label="Main navigation"><a class="nav ${view === "home" ? "active" : ""}" href="#">Adventures</a><a class="nav" href="#classics">Scripture games</a><a class="nav ${view === "multiplayer" ? "active" : ""}" href="#multiplayer">Play together</a><a class="nav ${view === "collection" ? "active" : ""}" href="#journey">My journey</a></nav><div class="top-tools"><span class="streak">${icon("Star")} ${progress.streak} day streak</span><select id="mode" aria-label="Difficulty mode" ${view === "play" ? "disabled" : ""}><option value="seeker" ${mode === "seeker" ? "selected" : ""}>Seeker / Kids</option><option value="growth" ${mode === "growth" ? "selected" : ""}>Growth</option></select><button class="theme-toggle" aria-label="Switch theme">${theme === "dark" ? "Light" : "Dark"}</button><button class="sound-toggle" aria-label="${sound ? "Mute" : "Enable"} sound" aria-pressed="${sound}">${icon("Sound")}</button></div></header>`;
 }
 function bindHeader() {
   document.querySelector("#mode").onchange = (e) => {
@@ -85,6 +88,7 @@ function bindHeader() {
     );
     if (sound) chime(true);
   };
+  document.querySelector(".theme-toggle").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = theme; save(); route(); };
 }
 function footer() {
   return `<footer><span>Rooted in Scripture. Made for curious hearts.</span><span>${storageAvailable ? "Progress saved on this device." : "Storage unavailable — progress lasts for this visit."}</span></footer>`;
@@ -107,17 +111,23 @@ function world() {
     )}<img class="cottage pixel" src="assets/fantasy/House_1_Wood_Base_Blue.png" alt=""><img class="traveller pixel" src="assets/fantasy/player.png" alt=""><img class="sheep pixel" src="assets/fantasy/sheep.png" alt=""><img class="chicken pixel" src="assets/fantasy/chicken.png" alt=""><span class="world-label">A little place to grow.</span></div>`;
 }
 
-function home() {
+function classics() {
   stop();
   document.querySelector("#app").innerHTML =
-    `${header()}<main><section class="play-welcome"><div><span class="eyebrow">CHOOSE YOUR NEXT ADVENTURE</span><h1>A little play. <em>A bigger story.</em></h1><p>Explore a new meadow, discover a fresh question, or gather your friends.</p></div><button class="secondary" id="surprise">Surprise me ↗</button></section><section class="featured-games" aria-label="New games"><a class="feature-card feature-meadow" href="#play/shepherd"><div class="feature-scene">${world()}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Shepherd’s Meadow</h2><p>WASD / arrows to explore. Bring every sheep home.</p><span class="feature-cta">Enter the meadow →</span></div></a><a class="feature-card feature-scrolls" href="#play/scrolls"><div class="feature-art">${icon("Papyrus")}${icon("Books")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Scroll Quest</h2><p>A new map. Six scrolls. Fresh Bible discoveries.</p><span class="feature-cta">Start your quest →</span></div></a><a class="feature-card feature-party" href="#multiplayer"><div class="feature-art">${icon("Players")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2–8 PLAYERS ONLINE</span><h2>Guess the Chapter</h2><p>Describe the story. Keep the chapter secret.</p><span class="feature-cta">Create or join a room →</span></div></a></section><section class="library"><div class="section-heading"><div><span class="eyebrow">PICK A PATH</span><h2>What will you discover today?</h2></div><span class="count">${Object.keys(progress.games).length} / ${games.length} solo games explored</span></div><div class="game-grid">${games.filter(g=>!["shepherd","scrolls"].includes(g.id))
+    `${header()}<main><section class="play-welcome"><div><span class="eyebrow">CHOOSE YOUR NEXT ADVENTURE</span><h1>A little play. <em>A bigger story.</em></h1><p>Explore a new meadow, discover a fresh question, or gather your friends.</p></div><button class="secondary" id="surprise">Surprise me →</button></section><section class="featured-games" aria-label="New games"><a class="feature-card feature-meadow" href="#play/shepherd"><div class="feature-scene">${world()}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Shepherd’s Meadow</h2><p>WASD / arrows to explore. Bring every sheep home.</p><span class="feature-cta">Enter the meadow →</span></div></a><a class="feature-card feature-scrolls" href="#play/scrolls"><div class="feature-art">${icon("Papyrus")}${icon("Books")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2D ADVENTURE</span><h2>Scroll Quest</h2><p>A new map. Six scrolls. Fresh Bible discoveries.</p><span class="feature-cta">Start your quest →</span></div></a><a class="feature-card feature-party" href="#multiplayer"><div class="feature-art">${icon("Players")}</div><div class="feature-copy"><span class="eyebrow">NEW · 2–8 PLAYERS ONLINE</span><h2>Guess the Chapter</h2><p>Describe the story. Keep the chapter secret.</p><span class="feature-cta">Create or join a room →</span></div></a></section><section class="library"><div class="section-heading"><div><span class="eyebrow">PICK A PATH</span><h2>What will you discover today?</h2></div><span class="count">${Object.keys(progress.games).length} / ${games.length} solo games explored</span></div><div class="game-grid">${games.filter(g=>!["shepherd","scrolls"].includes(g.id))
       .map((g, i) => {
         const played = progress.games[g.id];
-        return `<a class="game-card ${g.color}" href="#play/${g.id}"><div class="card-art">${icon(g.icon)}<span class="card-number">${String(i + 1).padStart(2, "0")}</span>${played ? `<span class="progress-ring" style="--progress:${played.best}%" aria-label="Best score ${played.best} percent"><b>${played.best}</b></span>` : ""}</div><div class="card-copy"><span class="tag">${g.tag}</span><h3>${g.title}</h3><p>${g.goal}</p><div class="card-bottom"><span>${played ? "Play again" : "Start exploring"}</span><span class="round-arrow">↗</span></div></div></a>`;
+        return `<a class="game-card ${g.color}" href="#play/${g.id}"><div class="card-art">${icon(g.icon)}<span class="card-number">${String(i + 1).padStart(2, "0")}</span>${played ? `<span class="progress-ring" style="--progress:${played.best}%" aria-label="Best score ${played.best} percent"><b>${played.best}</b></span>` : ""}</div><div class="card-copy"><span class="tag">${g.tag}</span><h3>${g.title}</h3><p>${g.goal}</p><div class="card-bottom"><span>${played ? "Play again" : "Start exploring"}</span><span class="round-arrow">→</span></div></div></a>`;
       })
       .join("")}</div></section>${footer()}</main>`;
   bindHeader();
   document.querySelector("#surprise").onclick = () => {location.hash="play/"+freshRound("surprise-game",games,1)[0].id;};
+}
+function home(view='home') {
+ stop();
+ document.querySelector('#app').innerHTML=`${header()}<main id="arcade-root"></main>`;
+ bindHeader();
+ activeModule=arcade(document.querySelector('#arcade-root'),view,chime);
 }
 function collection() {
   stop();
@@ -265,6 +275,9 @@ function route() {
   const hash = location.hash.slice(1);
   if (hash==="multiplayer") party();
   else if(/^room\/[A-Z2-9]{6}$/.test(hash)) party(hash.slice(5));
+  else if (hash.startsWith("arcade/")) home(hash.slice(7));
+  else if(hash==="profile") home("profile");
+  else if(hash==="classics") classics();
   else if (hash.startsWith("play/")) play(hash.slice(5));
   else if (hash === "journey") collection();
   else home();
@@ -272,3 +285,5 @@ function route() {
 }
 window.addEventListener("hashchange", route);
 route();
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});

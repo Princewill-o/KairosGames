@@ -32,3 +32,9 @@ node_modules/
 /dist/
 /.wrangler/
 /server/static.generated.mjs
+/unity/**/Library/
+/unity/**/Temp/
+/unity/**/Logs/
+/unity/**/Obj/
+/unity/**/UserSettings/
+/tests/arcade-*.png

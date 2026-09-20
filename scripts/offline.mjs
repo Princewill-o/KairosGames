@@ -1,0 +1,7 @@
+import fs from 'node:fs/promises';import path from 'node:path';import {createHash} from 'node:crypto';
+export async function writeOffline(){const files=[];const hash=createHash('sha256');async function walk(dir){for(const f of await fs.readdir(dir,{withFileTypes:true})){if(f.name.startsWith('.')||f.name==='sw.js'||f.name.endsWith('.mp4'))continue;const p=path.join(dir,f.name);if(f.isDirectory())await walk(p);else{files.push('/'+path.relative('public',p));hash.update(await fs.readFile(p));}}}await walk('public');files.push('/');const version=hash.digest('hex').slice(0,12);await fs.writeFile('public/sw.js',`const CACHE='kairos-arcade-${version}';
+const FILES=${JSON.stringify(files)};
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('kairos-arcade-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/signin-')||u.pathname.startsWith('/signout-')||u.pathname==='/relay-info'||u.pathname.endsWith('.mp4'))return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));}return r;}).catch(async()=>await caches.match(e.request)||new Response('Offline: this page is not cached yet.',{status:503})));});
+`);}

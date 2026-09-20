@@ -512,7 +512,7 @@ export const armor = [
   {
     id: "peace",
     name: "Shoes of Peace",
-    symbol: "↔",
+    symbol: "/",
     scenario:
       "Two friends are arguing. You want to bring a peaceful word instead of adding fuel.",
     reference: "Ephesians 6:15",

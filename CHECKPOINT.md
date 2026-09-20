@@ -1,0 +1,11 @@
+# Playable checkpoint — 20 September 2026
+
+Open http://localhost:4173/ and reload. Skip the existing intro to reach the adventure library. Select one of five games, then Solo or 2P this device. Choose one of four explorers under the player badge. Existing Scripture games remain under Scripture games.
+
+Changes: no emoji pictograms in authored site source; supplied handmade play/pause/replay controls; illustrated animal/object atlas; four-frame transparent character walk cycles; catch particles and combo rewards; forgiving catch retries; responsive layouts and sticky touch controls; original 13 activities preserved. Guest arcade collections persist on this device. Account profile endpoint and hosted sign-in link implemented, but hosted authentication has not been tested or deployed in this session.
+
+Validation: 30 Node unit tests passed; Worker build passed. Browser tests passed solo controls and pause/resume for all five games, same-device 2P mounting for all five, character/profile persistence, and 390px mobile layouts with no overflow or runtime exceptions. Complete-round tests exercise all five games in both Solo and 2P and verify ten saved results (see tests/arcade-completion.mjs and task output). These are automated simulation checks, not physical-phone or playability certification.
+
+Outstanding: Unity game port is NOT complete. Unity Hub exists, but no Editor was found and free disk was only 0.5–1 GB. unity/KairosAdventures contains only a project seed and animation component, uncompiled. Free 15–20 GB or provide external storage, then install Unity 6.3 LTS + Web Build Support. Port one complete game and validate export/mobile performance before replacing the working browser version. The supplied pack's LAN relay is implemented but two-device end-to-end, host migration, and offline-cache behavior still need explicit browser verification. More varied levels, character actions and original scene art remain design work. Do not claim all specifications are complete.
+
+The local preview is the deliverable for this budget checkpoint; the public hosted site has not been updated. No unrelated user files were deleted. Source changes remain uncommitted. Usage is checked through the Codex account tool; stop before exhausting the main window.

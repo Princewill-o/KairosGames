@@ -1,0 +1,7 @@
+import {chromium} from 'playwright';import assert from 'node:assert/strict';
+const b=await chromium.launch({headless:true,channel:'chrome'});const p=await b.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));
+await p.addInitScript(()=>{let t=0;window.requestAnimationFrame=cb=>setTimeout(()=>cb(t+=100),0);window.cancelAnimationFrame=clearTimeout;});
+try{await p.goto('http://localhost:4173');await p.locator('#intro-skip').click();await p.locator('#site-intro').waitFor({state:'detached'});
+for(const mode of ['solo','duo'])for(const id of ['ark-park','galilee','pharaoh-chase','plague-party','lost-sheep']){await p.goto('http://localhost:4173/#arcade/'+id);await p.locator(`[data-mode="${mode}"]`).click();await p.locator('.arcade-results').waitFor({timeout:60000});assert.ok(await p.locator('#arcade-again').isVisible());console.log('PASS complete',mode,id);await p.goto('http://localhost:4173/#');}
+assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('library.v1')).stats.matchesPlayed),10);assert.deepEqual(errors,[]);console.log('PASS all rewards persisted and no runtime errors');
+}finally{await b.close();}
