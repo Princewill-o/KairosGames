@@ -2,7 +2,7 @@
 
 ## Revised selection from the supplied game-specific shortlist
 
-These five remote forks supersede the generic platformer/mobile choices below as the primary arcade references. All are unmodified upstream samples; none is integrated or runtime-tested in Kairos yet.
+These five remote forks supersede the generic platformer/mobile choices below as primary arcade references. The forks remain unmodified upstream samples. The current repository now imports the small Ark collection components and contains original prototype game loops plus NGO integration; see [README.md](README.md) and [THIRD_PARTY.md](THIRD_PARTY.md) for the precise implementation status. Unity runtime testing is still pending. The selection notes below describe the initial review, not completed game ports.
 
 | Game / shared system | Fork and upstream | Recorded Editor | License / adaptation |
 | --- | --- | --- | --- |

@@ -1,0 +1,6 @@
+@media (max-width: 650px) {
+  .topbar nav { flex-wrap: wrap; row-gap: 8px; max-width: 100%; height: auto; }
+  .topbar nav .nav { min-height: 36px; display: inline-flex; align-items: center; }
+}
+#unity-root { min-width: 0; }
+#unity-root iframe { display: block; }

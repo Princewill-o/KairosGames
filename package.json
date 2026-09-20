@@ -10,7 +10,9 @@
     "build": "node scripts/build.mjs",
     "db:generate": "drizzle-kit generate",
     "lan": "node tools/lan-relay.mjs",
-    "test:arcade": "node tests/arcade-browser.mjs"
+    "test:arcade": "node tests/arcade-browser.mjs",
+    "test:unity-web": "node tests/unity-browser.mjs",
+    "unity:preview": "node tools/unity-preview.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

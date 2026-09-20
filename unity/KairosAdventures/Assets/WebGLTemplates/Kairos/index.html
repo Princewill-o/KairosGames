@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Kairos Adventures</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#060609;color:white;font-family:system-ui}canvas{width:100%;height:100%;display:block}#status{position:absolute;top:12px;left:12px}button{padding:12px}</style></head>
+<body><canvas id="unity-canvas" tabindex="0" aria-label="Kairos Unity game"></canvas><div id="status" role="status">Loading Unity…</div>
+<script src="Build/{{{ LOADER_FILENAME }}}"></script>
+<script>
+let instance;
+const status=document.getElementById('status');
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='kairos:start'||!instance)return;
+ instance.SendMessage('Kairos','Configure',JSON.stringify(event.data));document.getElementById('unity-canvas').focus();
+});
+createUnityInstance(document.getElementById('unity-canvas'),{
+ dataUrl:'Build/{{{ DATA_FILENAME }}}',frameworkUrl:'Build/{{{ FRAMEWORK_FILENAME }}}',codeUrl:'Build/{{{ CODE_FILENAME }}}',
+ streamingAssetsUrl:'StreamingAssets',companyName:'Kairos',productName:'Kairos Adventures',productVersion:'0.1.0'
+},progress=>status.textContent='Loading Unity '+Math.round(progress*100)+'%').then(game=>{
+ instance=game;status.hidden=true;parent.postMessage({type:'kairos:ready'},location.origin);
+}).catch(error=>{status.textContent='Unity could not start on this browser. Return to the browser games.';console.error(error);});
+</script></body></html>

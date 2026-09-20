@@ -38,3 +38,7 @@ node_modules/
 /unity/**/Obj/
 /unity/**/UserSettings/
 /tests/arcade-*.png
+/unity-build/
+/public/unity-build/
+/unity/**/Builds/
+/unity/**/Assets/Resources/Kairos/
